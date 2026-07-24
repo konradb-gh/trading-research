@@ -236,6 +236,18 @@ It appeared with the **"hold until strength returns"** exit (sell when RSI recov
 rather than at the first bounce), at **slightly longer lookbacks** (3–4 days rather than 2)
 and **moderate rather than extreme** oversold thresholds.
 
+![Parameter-grid heatmap of expectancy per trade across all ten indices, six exit-and-stop combinations](figures/connors_dip_v1_AGGREGATE.png)
+
+*Every strategy variant tested, averaged across the ten markets. Each of the six panels is one
+combination of exit rule and stop-loss; within a panel, rows are the RSI lookback (1–4 days)
+and columns are how deep the oversold reading has to go (RSI below 5 through 30). Each cell's
+colour is its average profit or loss per trade after costs — blue is a loss, red is a profit,
+white is roughly break-even. The thing to notice is how overwhelmingly blue the grid is: the
+two textbook exits (top-left and bottom-row panels) are underwater almost everywhere. The only
+sustained patch of red sits in the two "sell when RSI recovers above 65" panels, at the longer
+3–4-day lookbacks and middling thresholds — that red island is the surviving strategy discussed
+below.*
+
 | Index | Average expectancy in that region |
 |---|---|
 | KOSPI | +0.99% *(small sample — fragile)* |
@@ -298,6 +310,17 @@ Before touching any data from 2013 onwards, the following was written down and n
 
 Seven of eight counting markets were profitable on data the strategy had never seen. On the
 face of it, that's a validated strategy.
+
+![Out-of-sample equity curves per market, 2013 onwards, for the no-stop and 2×ATR-stop versions](figures/connors_dip_v1_OOS_equity.png)
+
+*The pre-registered variant running on the sealed 2013-onwards data it had never seen — one line
+per market, growth of one unit on a log scale, for the no-stop version (left) and the version
+with a 2×ATR stop (right). Each flat stretch is a period holding no position, and each jump is a
+single completed trade; because the strategy fires so rarely, every line is a short staircase of
+just a handful of steps rather than a smooth curve. The no-stop panel makes the fragility visible
+— most markets drift up, but Germany (^GDAXI) and France (^FCHI) end below where they started, and
+one violent step down in early 2020 shows how much a single trade can swing a market with so few
+of them.*
 
 ---
 
