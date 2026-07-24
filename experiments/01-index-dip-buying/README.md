@@ -241,12 +241,12 @@ and **moderate rather than extreme** oversold thresholds.
 *Every strategy variant tested, averaged across the ten markets. Each of the six panels is one
 combination of exit rule and stop-loss; within a panel, rows are the RSI lookback (1–4 days)
 and columns are how deep the oversold reading has to go (RSI below 5 through 30). Each cell's
-colour is its average profit or loss per trade after costs — blue is a loss, red is a profit,
-white is roughly break-even. The thing to notice is how overwhelmingly blue the grid is: the
-two textbook exits (top-left and bottom-row panels) are underwater almost everywhere. The only
-sustained patch of red sits in the two "sell when RSI recovers above 65" panels, at the longer
-3–4-day lookbacks and middling thresholds — that red island is the surviving strategy discussed
-below.*
+colour is its average profit or loss per trade after costs — red is a loss, yellow is roughly
+break-even, green is a profit, and grey marks cells with too few trades to interpret. The thing
+to notice is how overwhelmingly red the grid is: the two textbook exits (top-left and bottom-row
+panels) are underwater almost everywhere. The only sustained patch of green sits in the two "sell
+when RSI recovers above 65" panels, at the longer 3–4-day lookbacks and middling thresholds —
+that green island is the surviving strategy discussed below.*
 
 | Index | Average expectancy in that region |
 |---|---|
