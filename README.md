@@ -48,6 +48,7 @@ ourselves:
 | # | Question | Instrument | Verdict | |
 |---|---|---|---|---|
 | 01 | Does buying the dip work on stock indices? | Indices | Survives, but fires too rarely to be usable | [read →](experiments/01-index-dip-buying/) |
+| 02 | Does dip-buying work on quality stocks? | Individual stocks | Real behaviour, but the edge ≈ its costs once survivorship is removed | [read →](experiments/02-quality-stock-dip-buying/) |
 
 More experiments will be added to this table as they're completed.
 
