@@ -1,0 +1,24 @@
+# Experiment 1 — "Dip-buying uptrending indices" (Connors family), global panel.
+# Fixed rules, NOT tuned. Instrument list frozen as of this spec.
+id: connors_dip_v1
+title: Dip-buying uptrending indices (Connors family), global panel
+
+universe: ["^GSPC", "^NDX", "^GDAXI", "^FTSE", "^FCHI", "^N225", "^KS11", "^HSI", "^AXJO", "EPOL"]
+robustness_only: ["EPOL"]        # 2010+ history -> near-zero in-sample data; reported anyway
+
+direction: long
+trend_filter_sma: 200            # entries only when close > 200-day SMA
+entry_timing: close              # enter at the same-day close when the signal fires
+one_position: true               # one position per instrument at a time
+
+grid:
+  rsi_period: [1, 2, 3, 4]
+  entry_threshold: [5, 10, 15, 20, 30]     # enter when RSI(period) < threshold
+  exit:
+    - {type: sma_cross, sma: 5, label: "close>5SMA"}
+    - {type: rsi_above, level: 65, label: "RSI>65"}
+    - {type: time_stop, bars: 3, label: "time3d"}
+  stop:
+    - {type: none, label: "nostop"}
+    - {type: atr, mult: 2.0, period: 14, label: "2xATR"}
+  # 4 periods x 5 thresholds x 3 exits x 2 stops = 120 cells per instrument

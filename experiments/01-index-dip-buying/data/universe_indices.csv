@@ -1,0 +1,11 @@
+ticker,name,role
+^GSPC,S&P 500,counting
+^NDX,Nasdaq 100,counting
+^GDAXI,DAX (Germany),counting
+^FTSE,FTSE 100 (UK),counting
+^FCHI,CAC 40 (France),counting
+^N225,Nikkei 225 (Japan),counting
+^KS11,KOSPI (South Korea),counting
+^HSI,Hang Seng (Hong Kong),counting
+^AXJO,ASX 200 (Australia),counting
+EPOL,iShares MSCI Poland ETF,"robustness_only (reported, no pass/fail weight)"

@@ -1,0 +1,38 @@
+symbol,reason
+BOL,"corrupt series: max 1-day move +1,352%"
+CBE,"corrupt series: max 1-day move +104,780%"
+CFC,"corrupt series: max 1-day move +428,471%"
+CIN,"corrupt series: max 1-day move +39,148%"
+CNG,"corrupt series: max 1-day move +1,069,705%"
+COMS,insufficient bars after zero-volume drop
+CPWR,corrupt series: max 1-day move +376%
+CSR,corrupt series: max 1-day move +120%
+DIGI,corrupt series: max 1-day move +257%
+EHC,corrupt series: max 1-day move +110%
+EP,corrupt series: max 1-day move +108%
+FMCC,corrupt series: max 1-day move +128%
+GDW,corrupt series: max 1-day move +200%
+GLK,corrupt series: max 1-day move +193%
+GR,corrupt series: max 1-day move +118%
+HET,insufficient bars after zero-volume drop
+HIG,corrupt series: max 1-day move +102%
+HPC,insufficient bars after zero-volume drop
+KMG,corrupt series: max 1-day move +122%
+KRI,"corrupt series: max 1-day move +5,412%"
+MAY,corrupt series: max 1-day move +670%
+MCIC,corrupt series: max 1-day move +600%
+MEE,insufficient bars after zero-volume drop
+NCE,corrupt series: max 1-day move +171%
+NGH,corrupt series: max 1-day move +243%
+OK,insufficient bars after zero-volume drop
+PTV,insufficient bars after zero-volume drop
+RYC,insufficient bars after zero-volume drop
+SVU,corrupt series: max 1-day move +100%
+SW,insufficient bars after zero-volume drop
+TIE,"corrupt series: max 1-day move +197,319%"
+TNB,"corrupt series: max 1-day move +712,232%"
+UCM,insufficient bars after zero-volume drop
+USBC,corrupt series: max 1-day move +300%
+UVN,corrupt series: max 1-day move +167%
+WMB,corrupt series: max 1-day move +101%
+WMX,insufficient bars after zero-volume drop

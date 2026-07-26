@@ -49,14 +49,49 @@ ourselves:
 |---|---|---|---|---|
 | 01 | Does buying the dip work on stock indices? | Indices | Survives, but fires too rarely to be usable | [read →](experiments/01-index-dip-buying/) |
 | 02 | Does dip-buying work on quality stocks? | Individual stocks | Real behaviour, but the edge ≈ its costs once survivorship is removed | [read →](experiments/02-quality-stock-dip-buying/) |
+| 03 | Does momentum work? | Indices and stocks | Complete negative — and a control that flattered it | [read →](experiments/03-momentum/) |
 
 More experiments will be added to this table as they're completed.
+
+Three for three, the pattern is the same: the behaviour is real enough, and the cost of
+capturing it is about the same size as the edge.
+
+---
+
+## How to read the numbers
+
+Three caveats apply to every paper here. None of them are footnotes — they change what the
+figures mean.
+
+**Absolute returns are upper bounds, not estimates.** Free data can only see part of any
+index's true historical membership, and the part it can't see skews toward companies that
+failed and were delisted. Coverage in these experiments runs from roughly 40% in the late
+1990s to about 90% in recent years. Every absolute return figure — for the strategies *and* for
+the benchmarks they're measured against — is therefore inflated by an unknown amount.
+
+**Relative comparisons are the trustworthy output.** Each strategy is compared against a
+benchmark built from the *identical* universe with the *identical* screens, so both sides carry
+the same distortion and it largely cancels. When a paper concludes something, the conclusion
+rests on a comparison, never on an absolute number.
+
+**Costs are modelled, not measured.** Every result is net of 0.10% slippage per side plus 0.20%
+round-trip commission, applied uniformly. No real broker's fills were used, no market-impact
+model is included, and financing costs are discussed rather than charged in most tables. Real
+execution would differ.
 
 ---
 
 ## What's here, and what isn't
 
-This repo holds the **papers and figures** — the finished write-ups you can read on GitHub.
+This repo holds the **papers, figures and the data behind them** — the finished write-ups you
+can read on GitHub, plus a `data/` folder in each experiment containing the results tables,
+coverage tables, universe lists, exclusion lists and verbatim pre-registrations. Each has a
+`DATA.md` describing every file, the column definitions, the sources with URLs, the screens
+applied and the cost model.
+
+Raw vendor price history is deliberately **not** published: it's large, and redistributing it
+is a licensing grey area. The exact ticker lists, date ranges and interval are published
+instead, so identical inputs can be re-downloaded.
 
 The **research code and data pipeline** that produce the numbers and charts live in a separate
 project. This repository is publish-only: it's the reading room, not the lab.

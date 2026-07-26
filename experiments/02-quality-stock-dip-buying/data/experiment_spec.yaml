@@ -1,0 +1,29 @@
+# Experiment 2 — "Quality-stock dip-buying". Stock-level version of the Connors
+# dip, where sample size is on our side. Fixed rules, NOT tuned.
+id: stock_dip_v1
+title: Quality-stock dip-buying (S&P 500, Trend-Template eligible)
+
+universe: sp500              # resolved via src.universe (backtest cache); survivorship caveat in header
+market: us
+analysis: pooled            # all stocks pooled into one surface — signal-level, no portfolio
+
+direction: long
+entry_timing: close         # enter at same-day close when the signal fires
+one_position: true          # one position per stock at a time
+
+eligibility:
+  trend_template: true      # stock passes the PRODUCTION Trend Template as-of D (reused machinery)
+  market_gate: {index: "^GSPC", sma: 200}   # AND ^GSPC closes above its 200d SMA on D
+
+grid:
+  rsi_period: [2, 3, 4]                      # period 1 dropped (Exp 1: degenerate)
+  entry_threshold: [5, 10, 15, 20]
+  exit:
+    - {type: sma_cross, sma: 5, label: "close>5SMA"}
+    - {type: rsi_above, level: 65, label: "RSI>65"}
+    - {type: rsi_above, level: 70, label: "RSI>70"}
+    - {type: time_stop, bars: 5, label: "time5d"}
+  stop:
+    - {type: none, label: "nostop"}
+    - {type: atr, mult: 2.0, period: 14, label: "2xATR"}
+  # 3 periods x 4 thresholds x 4 exits x 2 stops = 96 cells
