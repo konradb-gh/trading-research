@@ -28,34 +28,9 @@
 | requests | 2.32.5 | HTTP layer under the fetch helpers |
 | pyarrow | 21.0.0 | parquet read/write, local price cache |
 
-Checked directly: **no scipy or statsmodels** — neither is installed in the venv. Rank
-correlations use pandas' `.rank()` + numpy `corrcoef`; the exact permutation p-value in
-Phase A is hand-rolled with the stdlib (`itertools.permutations`, `math.factorial`), not a
-third-party stats package. No Wikipedia scrape — unlike Experiment 02, only point-in-time
-membership is used.
-
-**Engines** — no off-the-shelf backtesting framework; everything custom:
-`src/research/portfolio.py` (share-based monthly-rebalance engine, bit-reproducible) ·
-`momentum.py` (ranking/lookback logic) · `pit.py` (point-in-time membership, reused from
-Exp 02). Scripts: `research_momentum_phase_a3.py`, `_phase_b2.py`, `_oos.py` (sealed,
-config fixed in-file), `_crash_test.py`, `_turnover_check.py`, `_figures.py`.
-
-**Data**: Yahoo via `yfinance` — 8 ETFs (Phase A) + PIT-eligible stocks (Phase B), from
-[`fja05680/sp500`](https://github.com/fja05680/sp500), coverage 1996-01-02 onward. Phase A
-1993-01-29→2012-12-31; Phase B 1996-01-02→2012-12-31; sealed 2013-01-01→2026-07-23.
-
-**Costs**: 10bps/side + 0.20% round-trip — `config.yaml` lines 88–89.
-
-**Runtime**, warm cache, measured this session: Phase A <1s, Phase B ~1m52s, sealed OOS
-~2m19s (mostly disk I/O reading cached parquet, 15–30% CPU). Cold-cache not re-measured.
-
-**Reproducibility**: bit-reproducible after the determinism fix (commit `566ddb3`),
-verified across three `PYTHONHASHSEED` values; the figure generator asserts its re-run
-matches the sealed result to 1e-9 before plotting.
-
-**Real data, simulated trading**: prices are real historical data; synthetic series exist
-only in unit tests. **Process**: written with Claude Code, reviewed by a separate Claude
-instance with no stake in the outcome.
+**Real data, simulated trading**: prices are real historical data, not simulated. What's
+simulated is the trading — what these rules would have done. Synthetic price series appear
+only in unit tests, never in a published result.
 
 ---
 

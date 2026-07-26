@@ -28,35 +28,9 @@
 | requests | 2.32.5 | HTTP layer under the fetch helpers |
 | pyarrow | 21.0.0 | parquet read/write, local price cache |
 
-No Wikipedia scrape, no point-in-time membership — the universe is ten fixed index tickers
-declared directly in the experiment spec.
-
-**Engines** — no off-the-shelf backtesting framework (no backtrader, zipline, vectorbt);
-everything below is custom:
-`src/research/simulate.py` (dip-trade simulator + metrics) · `run.py`/`oos.py`
-(grid runner / sealed single-variant evaluator) · `report.py` (figures) ·
-`src/backtest/data.py` (Yahoo fetch + parquet cache).
-Entry point: `python research.py --experiment connors_dip_v1 --phase insample|oos`.
-
-**Data**: Yahoo Finance via `yfinance` — ^GSPC ^NDX ^GDAXI ^FTSE ^FCHI ^N225 ^KS11 ^HSI
-^AXJO EPOL (`data/universe_indices.csv`), full history through 2012-12-31 in-sample,
-2013-01-01 → 2026-07-2x sealed. No other data source.
-
-**Costs**: 10bps slippage/side + 0.20% round-trip commission — `config.yaml` lines 88–89,
-applied in `simulate.py`.
-
-**Runtime**, warm cache, measured this session: in-sample grid ~12s, sealed OOS ~1s.
-Cold-cache (first Yahoo fetch) not re-measured — network-bound, cached permanently after.
-
-**Reproducibility**: parquet cache, git-tracked source; every figure here checked
-byte-identical against a fresh re-run this session.
-
 **Real data, simulated trading**: prices are real historical data, not simulated. What's
 simulated is the trading — what these rules would have done. Synthetic price series appear
 only in unit tests, never in a published result.
-
-**Process**: code written with Claude Code; results reviewed by a separate Claude instance
-with no stake in the outcome.
 
 ---
 

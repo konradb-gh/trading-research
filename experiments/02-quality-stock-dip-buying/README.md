@@ -29,36 +29,9 @@
 | pyarrow | 21.0.0 | parquet read/write, local price cache |
 | lxml (via `pd.read_html`) | 6.1.1 | scrapes today's S&P 500 list |
 
-First experiment needing a live constituent list and PIT membership — Exp 01's ten fixed
-tickers need neither.
-
-**Engines** — no off-the-shelf backtesting framework; everything custom:
-`src/research/eligibility.py` (Trend-Template + market-gate mask) · `stocks.py` (pooled
-signal simulator) · `pit.py` (point-in-time correction) · `src/template.py`/`regime.py`
-(the quality/regime rules themselves, reused verbatim from the live screener).
-Entry points: `python research.py --experiment stock_dip_v1 --phase insample|oos`,
-`python research/pit_rerun.py`, `python research/pit_coverage.py`.
-
-**Data**: Yahoo Finance via `yfinance` for prices; Wikipedia
-([List of S&P 500 companies](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies))
-for today's constituents; [`fja05680/sp500`](https://github.com/fja05680/sp500) — "S&P 500
-Historical Components & Changes (Updated).csv" — for point-in-time membership, coverage
-1996-01-02 onward. Full ticker list: `data/universe_pit_availability.csv`. History through
-2012-12-31 in-sample, 2013-01-01 → 2026-07-2x sealed; PIT coverage ~52% in-sample, ~81% OOS.
-
-**Costs**: 10bps slippage/side + 0.20% round-trip commission — `config.yaml` lines 88–89.
-
-**Runtime**, warm eligibility cache, measured this session: in-sample pooled grid ~68s,
-sealed OOS ~12s. Cold-cache first eligibility precompute wasn't re-measured this pass
-(un-verified estimate elsewhere: ~25 min).
-
-**Reproducibility**: parquet + PIT-eligibility caching; verdict reproduced exactly on re-run.
-
-**Real data, simulated trading**: prices are real historical data; synthetic series exist
-only in unit tests.
-
-**Process**: written with Claude Code; reviewed by a separate Claude instance with no stake
-in the outcome.
+**Real data, simulated trading**: prices are real historical data, not simulated. What's
+simulated is the trading — what these rules would have done. Synthetic price series appear
+only in unit tests, never in a published result.
 
 ---
 
