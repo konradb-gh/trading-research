@@ -79,9 +79,9 @@ it beat just buying the index?"**
 
 All prices came from Yahoo Finance via the `yfinance` Python library, daily bars only.
 
-**Phase A** used ten index ETFs — SPY, QQQ, EFA, EEM and regional funds covering Germany, Japan,
-the UK and China. Available history begins in 1993 (SPY's inception) and the funds launch at
-different dates through 2004.
+**Phase A** used eight index ETFs — SPY, QQQ, EFA and EEM, plus regional funds covering Germany,
+Japan, the UK and China. Available history begins in 1993 (SPY's inception) and the funds launch
+at different dates through 2004.
 
 **Phase B** used S&P 500 constituents, with membership taken from a **point-in-time** dataset
 (`fja05680/sp500`) recording who was actually in the index on each historical day, rather than
@@ -116,19 +116,29 @@ criteria as binding. Two additional standards applied here, each earned by an ea
 
 ## 4. Phase A — trend following on indices
 
-On the full exploration window, the best configuration beat buy-and-hold by about one
-percentage point a year. Promising, until you split the window in half.
+On the full exploration window, the best configuration beat buy-and-hold by about **2.2
+percentage points** a year. Promising, until you split the window in half.
 
-**In the first half, ten of twelve configurations beat buy-and-hold. In the second half, only
+First, a correction to the design. The twelve variations described above were really **six**: the
+market-filter arm had never been wired into the code, so each pair of configurations was
+identical. That was one of several problems an audit turned up, described in the next section.
+All figures here come from the corrected engine.
+
+**In the first half, four of the six configurations beat buy-and-hold. In the second half, only
 two did.** That's a warning sign rather than proof of anything, so we ran the proper test: rank
-every configuration by how well it did in the first half, rank them again by the second half,
-and see whether first-half success predicts second-half success.
+every configuration by how well it did in the first half, rank them again by the second half, and
+see whether first-half success predicts second-half success.
 
 **It doesn't.** The rank correlation was **−0.66** — if anything the ordering inverts, though at
-this sample size (six genuinely distinct configurations) that's not statistically significant
-in either direction. What *is* clear is the absence of any positive relationship: the
-configurations that worked early were not the ones that worked later. Only one configuration
-beat buy-and-hold in both halves, against a chance expectation of 1.3.
+six configurations that isn't statistically significant in either direction. What *is* clear is
+the absence of any positive relationship: the configurations that worked early were not the ones
+that worked later. Only one configuration beat buy-and-hold in both halves, against a chance
+expectation of 1.3.
+
+There's a second problem, independent of all this. The two halves aren't testing the same thing.
+The ETF universe grows from one fund to eight over the period — **31.5% of first-half days held
+only SPY.** The first half is a one-to-six-instrument strategy; the second is a
+six-to-eight-instrument one. Any comparison between them is confounded by diversification.
 
 ![Phase A: bar chart of each configuration's return versus buy-and-hold in each half, and a slope chart of their rankings between halves](figures/phase_a_window_split.png)
 
@@ -141,15 +151,6 @@ line. If early success predicted later success the lines would run roughly flat;
 criss-cross, with the first half's best configuration (6-month, skip) finishing last and the
 second half's best (3-month, no-skip) having been fifth of six. That crossing pattern is the
 −0.66 rank correlation made visible.*
-
-Two further problems surfaced when the numbers were audited:
-
-- The twelve "configurations" were really **six**. The market-filter arm had never been wired
-  in, so each pair was identical.
-- The two halves aren't testing the same thing. The ETF universe grows from one fund to eight
-  over the period — **31.5% of first-half days held only SPY.** The first half is a
-  one-to-six-instrument strategy; the second is a six-to-eight-instrument one. Any comparison
-  between them is confounded by diversification.
 
 **Verdict: not robust. Closed as a documented negative, with no sealed test spent on it.**
 
@@ -173,8 +174,10 @@ typos — they were reasoning errors:
   computed and then never used; a metric measuring the wrong quantity; and an implicit
   assumption of free *daily* rebalancing that silently changed the strategy being tested.
 - A figure reported as a measurement — "the market was favourable 100% of the time in-sample" —
-  turned out to be **a hardcoded line of text that had never been computed.** The true figure
-  was 28%.
+  turned out to be **a hardcoded line of text that had never been computed.** Measured properly,
+  the market was *unfavourable* 28% of the time, so the true favourable figure was roughly 72%,
+  not 100%. The claim mattered because it had been used to argue that one arm of the test was
+  inert for benign reasons; the real reason was that the arm had never been wired in at all.
 - A causal explanation was written up as an established finding when the test supporting it had
   never been run.
 
@@ -290,10 +293,11 @@ momentum carry information? — separately from whether the strategy makes money
 
 Then a follow-up question: **was the control matched on how often it traded?**
 
-It wasn't. Picking 85 fresh names from roughly 427 eligible each month means replacing about
-80% of the portfolio monthly. Momentum, whose winners tend to remain winners, replaced about
-25%. So the random portfolios paid roughly **three times the trading costs** — a handicap with
-nothing to do with skill.
+It wasn't. Picking fresh names from roughly 427 eligible each month means replacing most of the
+portfolio monthly — about 69% on the pre-registered version, and 80% on the unfiltered one, where
+no month is ever spent in cash. Momentum, whose winners tend to remain winners, replaced about
+25–27%. So on the version being tested the random portfolios paid roughly **two and a half times
+the trading costs** — a handicap with nothing to do with skill.
 
 Comparing the two *before* costs, which is what the control was actually for:
 
@@ -376,17 +380,18 @@ costs were the same size as the edge.
 
 ```bash
 # Phase A exploration (index trend following, pre-2013 only)
-python research_momentum_phase_a.py
+python research_momentum_phase_a3.py
 
 # Phase B exploration (stock ranking, pre-2013 only)
-python research.py --experiment stock_momentum_v1 --phase insample
+python research_momentum_phase_b2.py
 
-# The sealed test — accepts only the pre-registered configuration
-python research.py --experiment stock_momentum_v1 --phase oos \
-    --variant 'lookback=12;hold=top20pct;gate=on;filter=off'
+# The sealed test — runs only the pre-registered configuration
+python research_momentum_oos.py
 ```
 
-Data files, the pre-registration, and the verdicts are in this folder. Everything runs on a
+The pre-registered configuration is fixed inside the sealed runner rather than passed as an
+argument, so it cannot be varied after the fact. Data files, the pre-registration and the
+verdicts are in this folder; `DATA.md` documents every file and column. Everything runs on a
 laptop using free public data.
 
 ---

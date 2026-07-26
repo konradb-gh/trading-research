@@ -18,9 +18,17 @@ Everything behind the numbers in the paper, except raw vendor price history (see
 
 The two `SUPERSEDED` files were produced before four defects in the calculation engine were
 found and fixed (costs charged on the whole portfolio regardless of turnover; an unused
-slippage parameter; a mismeasured metric; implicit free daily rebalancing). They are kept
-because two figures in §4 of the paper — "about one percentage point a year" and "ten of
-twelve / only two" — come from them. See the integrity note in the top-level README.
+slippage parameter; a mismeasured metric; implicit free daily rebalancing) — the audit
+described in §5 of the paper. Every number quoted in the paper itself, including §4's Phase A
+table, now comes from `phaseA_results_corrected.csv`; nothing in the published prose depends
+on the superseded file any more.
+
+They are kept anyway, specifically so §5's claim can be checked rather than taken on trust: a
+reader can diff `phaseA_results_SUPERSEDED_prefix_engine.csv` against
+`phaseA_results_corrected.csv` and see the actual pre-fix and post-fix numbers side by side —
+the best config's margin moving from +1.08pp to +2.24pp, and the first/second-half win counts
+moving from 10-of-12 / 2-of-12 to 4-of-6 / 2-of-6 — rather than being asked to believe the audit
+happened. **Do not use these two files for anything except that comparison.**
 
 **`phaseA_results_corrected.csv` columns**
 
