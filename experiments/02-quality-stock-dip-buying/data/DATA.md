@@ -5,6 +5,21 @@ Everything behind the numbers in the paper, except raw vendor price history (see
 
 ---
 
+## Note on `stock_dip_v1_pooled_expectancy.png`
+
+This figure was republished after source commit `7ac7eb6` ("viz: use RdYlGn for research
+heatmaps — red = loss, green = profit"), which changed the heatmap colour scale project-wide
+from the matplotlib default (`RdBu_r`, where profit renders red) to the finance-convention
+scale used throughout this series (`RdYlGn`, where profit renders green). The figure originally
+published here predated that commit.
+
+**Only the colour mapping changed.** Every annotated cell value in the corrected figure is
+pixel-identical to the original — verified by decoding both PNGs and diffing the underlying
+grid of numbers (0.62, 1.53, 2.04, … all 64 cells, exact) — so no result in this experiment was
+ever affected. The figure is now consistent with the colour convention used in Papers 01 and 03.
+
+---
+
 ## Files
 
 | File | Contents |
