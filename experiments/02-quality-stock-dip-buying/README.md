@@ -160,7 +160,7 @@ from about +0.3% to +2.0% per trade. Two sensible patterns appeared:
 
 ![Parameter-grid heatmap of expectancy per trade across all quality-stock variants](figures/stock_dip_v1_pooled_expectancy.png)
 
-*Every strategy variant tested on pre-2013 data. Each of the eight panels is one combination of exit rule and stop-loss; within a panel, rows are the RSI lookback (2–4 days) and columns are how deep the oversold reading has to go (RSI below 5 through 20). Each cell's colour is its average profit or loss per trade after costs — red is a loss, pale salmon is roughly break-even, and nearly all visible cells are green or near-white, meaning almost every variant was profitable in exploration. Grey marks cells with too few trades to interpret.*
+*Every strategy variant tested on pre-2013 data. Each of the eight panels is one combination of exit rule and stop-loss; within a panel, rows are the RSI lookback (2–4 days) and columns are how deep the oversold reading has to go (RSI below 5 through 20). Each cell's colour is its average profit or loss per trade after costs — red is a loss, pale yellow is roughly break-even, and nearly all visible cells are green or near-white, meaning almost every variant was profitable in exploration. The handful of mildly negative cells (the two −0.3-ish entries in the RSI>65/RSI>70, 2×ATR panels) sit in pale salmon. Grey marks cells with too few trades to interpret.*
 
 - **Deeper dips paid more** — the more oversold the entry, the bigger the bounce.
 - **Holding until strength returns beat selling the first bounce** — the same detail that
