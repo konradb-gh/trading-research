@@ -6,6 +6,62 @@
 
 ---
 
+## How this was built
+
+*Pulled from the running system this session, not written from memory.*
+
+| | |
+|---|---|
+| **Hardware** | MacBook Pro, Apple M3 Pro (11 cores: 5P+6E), 36GB RAM — `system_profiler SPHardwareDataType` |
+| **OS** | macOS 26.5.2, build 25F84 — `sw_vers` |
+| **Python** | 3.9.6, project venv |
+
+**Libraries actually imported** by this experiment's own scripts (`grep`, then `pip freeze` for versions):
+
+| Library | Ver. | Role |
+|---|---|---|
+| pandas | 2.3.3 | stock series, pooled trade tables, PIT comparison |
+| numpy | 2.0.2 | eligibility masks, metric arrays |
+| matplotlib | 3.9.4 | pooled heatmaps + equity-curve figures |
+| PyYAML | 6.0.3 | `config.yaml` + experiment spec |
+| yfinance | 1.2.0 | daily OHLCV for ~750 ever-members |
+| requests | 2.32.5 | HTTP layer under the fetch helpers |
+| pyarrow | 21.0.0 | parquet read/write, local price cache |
+| lxml (via `pd.read_html`) | 6.1.1 | scrapes today's S&P 500 list |
+
+First experiment needing a live constituent list and PIT membership — Exp 01's ten fixed
+tickers need neither.
+
+**Engines** — no off-the-shelf backtesting framework; everything custom:
+`src/research/eligibility.py` (Trend-Template + market-gate mask) · `stocks.py` (pooled
+signal simulator) · `pit.py` (point-in-time correction) · `src/template.py`/`regime.py`
+(the quality/regime rules themselves, reused verbatim from the live screener).
+Entry points: `python research.py --experiment stock_dip_v1 --phase insample|oos`,
+`python research/pit_rerun.py`, `python research/pit_coverage.py`.
+
+**Data**: Yahoo Finance via `yfinance` for prices; Wikipedia
+([List of S&P 500 companies](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies))
+for today's constituents; [`fja05680/sp500`](https://github.com/fja05680/sp500) — "S&P 500
+Historical Components & Changes (Updated).csv" — for point-in-time membership, coverage
+1996-01-02 onward. Full ticker list: `data/universe_pit_availability.csv`. History through
+2012-12-31 in-sample, 2013-01-01 → 2026-07-2x sealed; PIT coverage ~52% in-sample, ~81% OOS.
+
+**Costs**: 10bps slippage/side + 0.20% round-trip commission — `config.yaml` lines 88–89.
+
+**Runtime**, warm eligibility cache, measured this session: in-sample pooled grid ~68s,
+sealed OOS ~12s. Cold-cache first eligibility precompute wasn't re-measured this pass
+(un-verified estimate elsewhere: ~25 min).
+
+**Reproducibility**: parquet + PIT-eligibility caching; verdict reproduced exactly on re-run.
+
+**Real data, simulated trading**: prices are real historical data; synthetic series exist
+only in unit tests.
+
+**Process**: written with Claude Code; reviewed by a separate Claude instance with no stake
+in the outcome.
+
+---
+
 ## What this paper tests — and what it doesn't
 
 This paper tests **individual stocks**: buying short-term dips in high-quality S&P 500

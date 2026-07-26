@@ -6,6 +6,59 @@
 
 ---
 
+## How this was built
+
+*Pulled from the running system this session, not written from memory.*
+
+| | |
+|---|---|
+| **Hardware** | MacBook Pro, Apple M3 Pro (11 cores: 5P+6E), 36GB RAM — `system_profiler SPHardwareDataType` |
+| **OS** | macOS 26.5.2, build 25F84 — `sw_vers` |
+| **Python** | 3.9.6, project venv |
+
+**Libraries actually imported** by this experiment's own scripts (`grep`, then `pip freeze` for versions):
+
+| Library | Ver. | Role |
+|---|---|---|
+| pandas | 2.3.3 | portfolio state, monthly returns, all result tables |
+| numpy | 2.0.2 | vectorised P&L, `corrcoef`, `percentile`, `rng.permutation` |
+| matplotlib | 3.9.4 | the three figures in this paper |
+| PyYAML | 6.0.3 | `config.yaml` (costs, wall) |
+| yfinance | 1.2.0 | daily OHLCV, index ETFs + ~750 stock tickers |
+| requests | 2.32.5 | HTTP layer under the fetch helpers |
+| pyarrow | 21.0.0 | parquet read/write, local price cache |
+
+Checked directly: **no scipy or statsmodels** — neither is installed in the venv. Rank
+correlations use pandas' `.rank()` + numpy `corrcoef`; the exact permutation p-value in
+Phase A is hand-rolled with the stdlib (`itertools.permutations`, `math.factorial`), not a
+third-party stats package. No Wikipedia scrape — unlike Experiment 02, only point-in-time
+membership is used.
+
+**Engines** — no off-the-shelf backtesting framework; everything custom:
+`src/research/portfolio.py` (share-based monthly-rebalance engine, bit-reproducible) ·
+`momentum.py` (ranking/lookback logic) · `pit.py` (point-in-time membership, reused from
+Exp 02). Scripts: `research_momentum_phase_a3.py`, `_phase_b2.py`, `_oos.py` (sealed,
+config fixed in-file), `_crash_test.py`, `_turnover_check.py`, `_figures.py`.
+
+**Data**: Yahoo via `yfinance` — 8 ETFs (Phase A) + PIT-eligible stocks (Phase B), from
+[`fja05680/sp500`](https://github.com/fja05680/sp500), coverage 1996-01-02 onward. Phase A
+1993-01-29→2012-12-31; Phase B 1996-01-02→2012-12-31; sealed 2013-01-01→2026-07-23.
+
+**Costs**: 10bps/side + 0.20% round-trip — `config.yaml` lines 88–89.
+
+**Runtime**, warm cache, measured this session: Phase A <1s, Phase B ~1m52s, sealed OOS
+~2m19s (mostly disk I/O reading cached parquet, 15–30% CPU). Cold-cache not re-measured.
+
+**Reproducibility**: bit-reproducible after the determinism fix (commit `566ddb3`),
+verified across three `PYTHONHASHSEED` values; the figure generator asserts its re-run
+matches the sealed result to 1e-9 before plotting.
+
+**Real data, simulated trading**: prices are real historical data; synthetic series exist
+only in unit tests. **Process**: written with Claude Code, reviewed by a separate Claude
+instance with no stake in the outcome.
+
+---
+
 ## What this paper tests — and what it doesn't
 
 The first two papers in this series tested **mean reversion**: buying things that had just

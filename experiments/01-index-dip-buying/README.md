@@ -6,6 +6,60 @@
 
 ---
 
+## How this was built
+
+*Pulled from the running system this session, not written from memory.*
+
+| | |
+|---|---|
+| **Hardware** | MacBook Pro, Apple M3 Pro (11 cores: 5P+6E), 36GB RAM — `system_profiler SPHardwareDataType` |
+| **OS** | macOS 26.5.2, build 25F84 — `sw_vers` |
+| **Python** | 3.9.6, project venv |
+
+**Libraries actually imported** by this experiment's own scripts (`grep`, then `pip freeze` for versions):
+
+| Library | Ver. | Role |
+|---|---|---|
+| pandas | 2.3.3 | price series, trade tables, grid results |
+| numpy | 2.0.2 | equity-curve / metric arrays |
+| matplotlib | 3.9.4 | heatmap + equity-curve figures |
+| PyYAML | 6.0.3 | `config.yaml` (costs, wall) + experiment spec |
+| yfinance | 1.2.0 | daily OHLCV for the ten index tickers |
+| requests | 2.32.5 | HTTP layer under the fetch helpers |
+| pyarrow | 21.0.0 | parquet read/write, local price cache |
+
+No Wikipedia scrape, no point-in-time membership — the universe is ten fixed index tickers
+declared directly in the experiment spec.
+
+**Engines** — no off-the-shelf backtesting framework (no backtrader, zipline, vectorbt);
+everything below is custom:
+`src/research/simulate.py` (dip-trade simulator + metrics) · `run.py`/`oos.py`
+(grid runner / sealed single-variant evaluator) · `report.py` (figures) ·
+`src/backtest/data.py` (Yahoo fetch + parquet cache).
+Entry point: `python research.py --experiment connors_dip_v1 --phase insample|oos`.
+
+**Data**: Yahoo Finance via `yfinance` — ^GSPC ^NDX ^GDAXI ^FTSE ^FCHI ^N225 ^KS11 ^HSI
+^AXJO EPOL (`data/universe_indices.csv`), full history through 2012-12-31 in-sample,
+2013-01-01 → 2026-07-2x sealed. No other data source.
+
+**Costs**: 10bps slippage/side + 0.20% round-trip commission — `config.yaml` lines 88–89,
+applied in `simulate.py`.
+
+**Runtime**, warm cache, measured this session: in-sample grid ~12s, sealed OOS ~1s.
+Cold-cache (first Yahoo fetch) not re-measured — network-bound, cached permanently after.
+
+**Reproducibility**: parquet cache, git-tracked source; every figure here checked
+byte-identical against a fresh re-run this session.
+
+**Real data, simulated trading**: prices are real historical data, not simulated. What's
+simulated is the trading — what these rules would have done. Synthetic price series appear
+only in unit tests, never in a published result.
+
+**Process**: code written with Claude Code; results reviewed by a separate Claude instance
+with no stake in the outcome.
+
+---
+
 ## What this paper tests — and what it doesn't
 
 This paper tests **stock market indices**: the S&P 500, the Nasdaq 100, the DAX, and seven
