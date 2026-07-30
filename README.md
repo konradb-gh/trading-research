@@ -50,11 +50,15 @@ ourselves:
 | 01 | Does buying the dip work on stock indices? | Indices | Survives, but fires too rarely to be usable | [read →](experiments/01-index-dip-buying/) |
 | 02 | Does dip-buying work on quality stocks? | Individual stocks | Real behaviour, but the edge ≈ its costs once survivorship is removed | [read →](experiments/02-quality-stock-dip-buying/) |
 | 03 | Does momentum work? | Indices and stocks | Complete negative — and a control that flattered it | [read →](experiments/03-momentum/) |
+| 04 | What governs blow-up risk in our own screener? | Our live system | Account size is the binding constraint; most position-sizing rules never fire | [read →](experiments/04-system-risk/) |
 
 More experiments will be added to this table as they're completed.
 
-Three for three, the pattern is the same: the behaviour is real enough, and the cost of
-capturing it is about the same size as the edge.
+Across the first three, the pattern is the same: the behaviour is real enough, and the cost of
+capturing it is about the same size as the edge. The fourth is a different kind of piece — it turns
+the same method inward, auditing the risk profile of the screener this project built rather than a
+textbook idea, and finds that at a permanently small account the risk that matters lives in the
+size of the account, not in the rules you can tune.
 
 ---
 
