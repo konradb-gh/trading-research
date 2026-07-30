@@ -17,7 +17,7 @@ verbatim.
 | `step0_us-gpw_full.csv` | Step 0 — the capital-tracking test. Four arms × two gate states, full US+GPW history. The paper's §2 tables. |
 | `sweep_c_gate_on.csv` | Sweep C — concurrency cap {none, 8, 6, 5, 4, 3}, gate **on**, plus the published-engine reference row. The paper's §3 gate-on tables. |
 | `sweep_c_gate_off.csv` | Sweep C — the same sweep, gate **off**. The monotonic-drawdown mechanism table in §3. |
-| `sweep_a_gate_on.csv` | Sweep A — `risk_per_trade_pct` × `max_position_pct_of_equity` grid on top of concurrency cap = 3, gate on. The paper's §4 tables. |
+| `sweep_a_gate_on.csv` | Sweep A — `risk_per_trade_pct` × `max_position_pct_of_equity` grid on a concurrency cap of 3, gate on. The paper's §4 tables. (Cap 3 here predates Sweep C pinning its minimum at 4; see the note under this file below.) |
 
 ### `step0_us-gpw_full.csv`
 
@@ -71,16 +71,29 @@ One row per arm. `OFF(pub)` is the published risk-only engine (capital off, no c
 | `n_taken` | Trades taken |
 | `skip_conc` | Signals skipped because the concurrency cap was full |
 
-Paper §3 gate-on quotes: `OFF(pub)` (+17.73% / −43.84% / peak 4), `cap=none` (+4.39% / −48.45% /
-peak 16), `cap=3` (+11.26% / −41.80% / peak 3). Gate-off quotes the `maxDD_%` column across caps:
-−81.09 → −77.25 → −76.03 → −67.60 → −65.70 → −68.17. The worst-trade column is −3.13% at every cap
-in both files (a concurrency limit doesn't touch single-trade loss); `OFF(pub)`'s −3.63% differs
-only because capital-off sizing differs.
+Paper §3 puts the full `maxDD_%` grid for both gates side by side, because they disagree on which
+cap minimises drawdown and that disagreement is the point:
+
+- **Gate-off** (the clean mechanism, full history, no filter noise): −81.09 → −77.25 → −76.03 →
+  −67.60 → **−65.70** → −68.17 across caps none…3. A U-shape: the minimum is at **cap 4**, and
+  cap 3 ticks back up to −68.17. The paper recommends cap 4 on this curve.
+- **Gate-on** (the live config, but noisy): −48.45 / −46.53 / −47.18 / −49.52 / −46.78 / **−41.80**
+  — no orderly relationship to the cap. Cap 3 is nominally lowest here *and* has the highest return
+  (+11.26%), but the paper explicitly declines to pick on the gate-on table, treating both its best
+  drawdown and its best return as noise (§3).
+
+The worst-trade column is −3.13% at every cap in both files (a concurrency limit doesn't touch
+single-trade loss); `OFF(pub)`'s −3.63% differs only because capital-off sizing differs. Reference
+points quoted verbatim: `OFF(pub)` +17.73% / −43.84% / peak 4; `cap=none` +4.39% / −48.45% /
+peak 16.
 
 ### `sweep_a_gate_on.csv`
 
-One row per (`risk%`, `pos_cap`) cell — 4 risk budgets × 6 position caps = 24 rows. Built on top of
-`max_concurrent_positions = 3`, gate on, capital on, risk cap on actual risk.
+One row per (`risk%`, `pos_cap`) cell — 4 risk budgets × 6 position caps = 24 rows. Built on
+`max_concurrent_positions = 3`, gate on, capital on, risk cap on actual risk. (This sweep was run
+before Sweep C's drawdown minimum was correctly pinned at cap 4, so it is conditioned on 3, not the
+adopted 4. At a 1.8% budget the concurrency cap almost never binds — average concurrency < 1.2 — so
+the concentration findings are unchanged at 4; the file says 3, so the paper says 3. See §4.)
 
 | Column | Meaning |
 |---|---|
@@ -163,7 +176,7 @@ python research_backtest_step0.py
 python research_backtest_sweep_c.py --gate on
 python research_backtest_sweep_c.py --gate off
 
-# Sweep A — concentration, on top of concurrency cap = 3
+# Sweep A — concentration, on a concurrency cap of 3 (as run; see §4 / the Sweep A note above)
 python research_backtest_sweep_a.py --gate on
 ```
 

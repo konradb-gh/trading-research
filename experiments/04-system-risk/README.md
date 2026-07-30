@@ -156,48 +156,85 @@ is charged. The concurrency control was a **side effect** — invisible, and hos
 accounting choice. That's exactly the kind of thing that should be made explicit.
 
 So: replace the accident with an honest, legible rule — a hard cap on simultaneously-open
-positions — and sweep it. Under production semantics (capital on, risk cap on actual risk), varying
-only `max_concurrent_positions`:
+positions — and sweep it, `none` down to 3. Under production semantics (capital on, risk cap on
+actual risk), here is the whole grid, both gate states, because the two disagree and that
+disagreement *is* the finding:
 
-| Cap | Return | Worst drawdown | avg conc | peak conc | Trades |
-|---|---|---|---|---|---|
-| none | +4.39% | −48.45% | 1.61 | 16 | 2221 |
-| 3 | **+11.26%** | **−41.80%** | 0.96 | 3 | 1336 |
+| Cap | Gate-ON drawdown | Gate-ON return | Gate-OFF drawdown |
+|---|---|---|---|
+| none | −48.45% | +4.39% | −81.09% |
+| 8 | −46.53% | +4.04% | −77.25% |
+| 6 | −47.18% | −1.45% | −76.03% |
+| 5 | −49.52% | +0.31% | −67.60% |
+| **4** | −46.78% | −3.04% | **−65.70% ← min** |
+| **3** | **−41.80% ← min** | **+11.26% ← max** | −68.17% |
 
-A cap of 3 pulls the drawdown back to −41.80% — better than the published −43.84% — with an average
-concurrency (0.96) almost identical to the original engine's (0.89). It does the job the risk cap
-had been doing by accident, except you can now say what it does in one sentence.
+### Where the curve actually bottoms — read the clean signal, not the noisy one
 
-### The mechanism, shown clean
+The *gate-on* column is the live configuration, but it is also the noisy one: the regime filter
+reacts to a handful of episodes, so the drawdown bounces between −42% and −50% with **no orderly
+relationship to the cap at all.** Cap 3 is the lowest there, but cap 5 (−49.52%) is worse than no
+cap — that is not a signal you can size a rule on, any more than the returns beside it are.
 
-Return under the gate is noisy — it's a regime filter reacting to a handful of episodes, so any
-single number is a small sample. To see the concurrency mechanism *without* that noise, run the
-same sweep with the gate **off**, where the filter never sits out and the full history is always
-in play. The drawdown then falls monotonically as you tighten the cap:
+To see the concurrency mechanism itself, read the **gate-off** column, where the filter never sits
+out and the full history is always in play. There the relationship is clean, and it is a **U, not a
+slide**: drawdown improves as the cap tightens from none to 4 — −81% → −77% → −76% → −68% →
+**−65.7%** — and then **ticks back up at 3, to −68.2%.** The bottom of the curve is at **cap 4.**
+Tightening past it, to 3, makes the drawdown worse: you start starving the book of the few
+positions it needs to recover. (This is the number my own working note had backwards — I'd carried
+cap 3 as the minimum from a summary; the CSV puts the minimum at 4 and cap 3 above it. The CSV
+wins, and it changes the recommendation.)
 
-| Cap | none | 8 | 6 | 5 | 4 | 3 |
-|---|---|---|---|---|---|---|
-| Worst drawdown | −81.09% | −77.25% | −76.03% | −67.60% | **−65.70%** | −68.17% |
+### The pick: cap 4, on drawdown, declining a cap that looks better on the live config
 
-From −81% at no cap to −65.7% at a cap of 4 — a clean, monotonic 15-point improvement, exactly the
-shape you'd expect if uncontrolled concurrency is what deepens drawdowns: more correlated longs
-open at once, and a bad week hits all of them together. (The cap of 3 ticks *back up* to −68.17%,
-breaking the monotonic run at the very end; it's reported as it landed, not smoothed. At a cap that
-tight in the no-gate world you start starving the book of the few positions it needs to recover,
-which is its own small lesson about over-constraining.)
+**Adopt `max_concurrent_positions = 4`** — the value at which the concurrency mechanism minimises
+drawdown in the clean signal.
 
-One number that **doesn't** move across this whole sweep: the worst single trade stays pinned at
-**−3.13%** of equity at every cap. That's the right behaviour — a concurrency limit governs how
-many things can go wrong at once, not how much any one of them costs. Single-trade loss is a
-different lever, and it belongs to the next sweep.
+The discipline here is the whole point, so it's worth spelling out what's being *turned down*. On
+the live gate-on config, **cap 3 is the best cell in the table on both metrics** — highest return
+(+11.26%) *and* lowest drawdown (−41.80%). It is tempting for exactly that reason. But in a system
+whose edge is indistinguishable from zero, a single gate-on history is one noisy draw; cap 3's
+double win there is the same coin-flip that put cap 5 below no-cap two rows up. Picking 3 because it
+tops the live table is the mistake this project has now caught three times. The honest choice is the
+one the *mechanism* supports — cap 4 — even though it costs us the prettier live number.
+
+And to be clear about what cap 4 does **not** do: on the gate-on config its drawdown (−46.78%) is
+actually a shade **worse** than the published engine's −43.84%. Adopting it is not sold as an
+improvement to the realised live drawdown — on any single gated history that figure is noise. It is
+sold as putting the concurrency limit at the value the mechanism bottoms out at, made explicit and
+legible instead of hidden inside a risk-cap accounting choice.
+
+There is a second, more structural reason the cap is **not a live-drawdown fix**, and it is the
+account-size conclusion (§5) arriving early. The mechanism is real *inside the backtest* — the
+gate-off U is not an artifact. But at a 1.8% risk budget the book averages barely more than one
+position (**average concurrency 1.13** at cap 4), because capital is spent after a name or two.
+Signals do cluster — left uncapped, the book peaks at **16** concurrent positions on the busiest
+stretches while still averaging only **1.6** — so a cap of four bites in those rare clusters and
+sits idle the rest of the time. A **10,000 PLN** account spends almost all of its life well below a
+four-position book; what governs its everyday drawdown is *capital*, not the concurrency ceiling.
+The cap earns its place as a backstop against the occasional cluster, not as a lever on the routine
+risk — which is exactly why §5 can conclude that the account itself, not any of these rules, is the
+binding constraint.
+
+One number **doesn't** move across the entire sweep, either gate: the worst single trade stays
+pinned at **−3.13%** of equity at every cap. That's correct — a concurrency limit governs how many
+things can go wrong at once, not how much any one of them costs. Single-trade loss is a different
+lever, and it belongs to the next sweep.
 
 ---
 
 ## 4. Sweep A — concentration caps, and where they quietly become "risk-per-trade"
 
 The obvious tool for single-name blow-up risk is a **concentration cap**: never let one position
-exceed X% of equity. Sweep A tests it, stacked on top of the adopted concurrency cap of 3, at the
-live risk budget (1.8% per trade), varying the position cap from none down to 15%.
+exceed X% of equity. Sweep A tests it, stacked on a concurrency cap of **3**, at the live risk
+budget (1.8% per trade), varying the position cap from none down to 15%.
+
+(A note on that 3: Sweep A was run before Sweep C's minimum was correctly pinned at 4, so its cells
+are conditioned on `max_concurrent = 3`, not the adopted 4. It was left as-run rather than
+regenerated, because at a 1.8% budget capital exhausts after roughly one position — average
+concurrency is under 1.2 whether the cap is 3 or 4 — so the cap almost never binds inside this
+sweep, and the concentration findings below are unchanged at 4. The difference would be in the
+noise; the file says 3, so the paper says 3.)
 
 The first result is that at a real risk budget, the concentration cap has **almost nothing to do**,
 because a constraint you didn't design as a diversification rule got there first: the no-leverage
@@ -275,7 +312,7 @@ are tight relative to that budget. Position size as a fraction of equity is
 `risk% ÷ stop-distance`, so those two facts *force* large individual positions: a median of
 **29.5%** of equity and a 95th-percentile of **62.9%**. At that size, the no-leverage wall is hit
 constantly — capital clamps a third of all entries before any diversification rule is consulted —
-and you can only ever hold a **handful** of names at once (peak concurrency of 3 under the adopted
+and you can only ever hold a **handful** of names at once (peak concurrency of 4 under the adopted
 cap; left uncapped it wants 16, but capital and drawdown punish that).
 
 You cannot diversify this away while keeping the risk budget real. To hold ten or fifteen names
@@ -284,6 +321,14 @@ the account and the fixed costs of trading start to dominate the returns — the
 edge-eaten-by-costs wall the first three experiments kept hitting. Every position-sizing rule in
 this study either (a) never fires at this scale, or (b) fires only by becoming a disguised cut to
 the risk budget. There is no setting that buys diversification for free.
+
+This is what defangs even the one rule that *did* earn adoption. Sweep C's concurrency cap has a
+real mechanism behind it, but the account almost never reaches the concurrency it governs — the
+book averages barely more than one position (concurrency 1.13) because capital is spent first, and
+only brushes the four-position ceiling in rare signal clusters. A cap set at four is a backstop for
+the tail, not a brake on the everyday drawdown, which capital already owns. So even the rule this
+study keeps is not a live-drawdown improvement you can bank at 10,000 PLN; it's a legible guard-rail
+whose routine job was already being done, invisibly, by the size of the account.
 
 At **10,000 PLN** this stops being abstract. A median 29.5% position is **2,950 PLN**; a
 95th-percentile one is **6,290 PLN** — more than half the account in a single name. You do not have
@@ -364,7 +409,7 @@ python research_backtest_step0.py
 python research_backtest_sweep_c.py --gate on
 python research_backtest_sweep_c.py --gate off
 
-# Sweep A — concentration, on top of the adopted concurrency cap of 3
+# Sweep A — concentration, on a concurrency cap of 3 (as run; see §4 note)
 python research_backtest_sweep_a.py --gate on
 ```
 
